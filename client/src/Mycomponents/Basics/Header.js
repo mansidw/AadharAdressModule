@@ -17,6 +17,11 @@ import Select from 'react-select'
 import { useAuth } from "../../contexts/AuthContext"
 import { useHistory } from "react-router-dom"
 import axios from 'axios';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 
 
@@ -57,8 +62,17 @@ export const Header = () => {
     const classes = useStyles();
     const [selected,setSelected] = useState(null)
     const [namedata,setNamedata] = useState([])
-    const [number,setNumber] = useState(null)
-    const [yesdone,setYesdone] = useState(false)
+    const [number,setNumber] = useState([])
+    // const [yesdone,setYesdone] = useState(false)
+    const [open, setOpen] = useState(false);
+
+    const handleClickOpen = () => {
+      setOpen(true);
+    };
+
+    const handleClose = () => {
+      setOpen(false);
+    };
 
 
     useEffect(() => {
@@ -88,44 +102,39 @@ export const Header = () => {
           setError("Failed to log out")
         }
       }
-    
-    async function handleChange(selected){
-      setSelected(selected)
-      console.log(selected['value'])
-      const query = await firestore.collection("users").where("Name","==",selected['value']).get()
-      console.log(query.data())
+
+    async function handleChangepart2(number,name){
       try{
-        if(query.exists){
-          console.log(query.data().Phone)
-          setNumber(query.data().Phone)
-        }
-        try{
-          const response = await axios.post('http://localhost:8000/sendsms',{number:number,name:selected})
-          if(response.data == 'done'){
-            setYesdone(true)
-          }
-          console.log(response)
-        }catch(err){
-          console.log(err)
+        const response =await axios.post('http://localhost:8000/sendsms',{number,name})
+        if(response.data == 'done'){
+          handleClickOpen()
         }
       }
       catch(err){
         console.log(err)
       }
     }
-
     
+    async function handleChange(selected){
+      setSelected(selected)
+      console.log(selected['value'])
+      try{
+          const query = await firestore.collection("users").where("Name","==",selected['value']).get()
+          query.forEach((doc) => {
+            setNumber((old) => [...old, doc.data().Phone]);
+            console.log(doc.data().Phone)
+          })
+          handleChangepart2(number[0],selected['value'])
+      }
+      catch(err){
+        console.log(err)
+      }
+    }
+
     return (
         <>
     <CssBaseline />
     {error && <Alert variant="danger">{error}</Alert>}
-    {yesdone && <Alert
-        iconMapping={{
-          success: <CheckCircleOutlineIcon fontSize="inherit" />,
-        }}
-      >
-        `Message sent to ${selected}. Let's wait for the reply..`
-      </Alert>}
       <AppBar position="relative" className={classes.appbar}>
         <Toolbar>
           {/* <WorkIcon className={classes.icon} style={{'color':'#082032'}} onClick={()=>console.log("mansi")}/> */}
@@ -186,6 +195,26 @@ export const Header = () => {
 
         </Toolbar>
       </AppBar>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Message Sent!"}
+        </DialogTitle>
+        <DialogContent>
+          {selected ?<DialogContentText id="alert-dialog-description">
+            The request for POA has been sent to {selected['value']}
+          </DialogContentText> : <></>}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} autoFocus>
+            Okay
+          </Button>
+        </DialogActions>
+      </Dialog>
       </>
     )
 }

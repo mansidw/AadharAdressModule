@@ -4,7 +4,9 @@ const app = express()
 const port = 8000
 const cors = require('cors')
 require('dotenv').config();
-const Vonage = require('@vonage/server-sdk')
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = require('twilio')(accountSid, authToken);
 
 
 
@@ -60,32 +62,15 @@ app.post('/addressSend', async(req,res)=>{
 })
 
 
-app.post('/sendsms',async(req,res)=>{
+app.post('/sendsms',(req,res)=>{
     console.log(req.body)
-    const vonage = await new Vonage({
-        apiKey: process.env.VONAGE_API_KEY,
-        apiSecret: process.env.VONAGE_API_SECRET,
-        applicationId: process.env.VONAGE_APPLICATION_ID,
-        privateKey: "my_messages_app.key"
-      })
-
-    await vonage.channel.send(
-    { "type": "sms", "number": req.body.number },
-    { "type": "sms", "number": 9867672421 },
-    {
-        "content": {
-        "type": "text",
-        "text": "Request has been made for POA. Login to 'Mera aadhar' for more details!"
-        }
-    },
-    (err, data) => {
-        if (err) {
-        console.error(err);
-        } else {
-        console.log(data.message_uuid);
-        }
-    }
-    );
+    // client.messages
+    // .create({
+    //     body: 'A request to you has been made regarding the POA. Login to the "मेरा आधार" portal for more info.',
+    //     from: '+14195566741',
+    //     to: '+91'+req.body.number
+    // })
+    // .then(message => console.log(message.sid));
     res.send("done")
 
 })
