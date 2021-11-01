@@ -1,0 +1,24 @@
+{
+  "name": "webmash",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "webmashupAadhar"
+  },
+  "author": "mansi",
+  "license": "ISC",
+  "dependencies": {
+    "@vonage/server-sdk": "^2.10.10",
+    "axios": "^0.23.0",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "nexmo": "^2.7.0-beta-1",
+    "opencage-api-client": "^1.0.0"
+  }
+}
